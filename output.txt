@@ -1,0 +1,8 @@
+
+Processing seeking_alpha_pred.csv:
+NER Results:
+Markets have been volatile , initially starting 202 ##3 bull ##ishly before tumbling in response to recent Federal Reserve (ORG) movements and statements . In ##ves ##tors would not be un ##wise to at least pond ##er transition ##ing away from stocks and toward cash . This could be reward ##ing , but it also comes with risks of its own . For some investors , this transition may make sense , but for others the best move might be to divers ##ify further .
+
+Processing tweets.csv:
+NER Results:
+As travel demand continues to surge Mar riot t International (ORG) is spear ##head ##ing a movement to address one of the big ##ges ‰ [UNK] ? https : / / t . co / im ##O ##ek ##O ##F ##e ##Y ##s
