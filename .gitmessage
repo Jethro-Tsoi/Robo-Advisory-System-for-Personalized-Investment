@@ -1,0 +1,34 @@
+# <type>: <subject>
+# |<----  Using a maximum of 50 characters  ---->|
+
+
+# <body>
+# |<----   Try to limit each line to a maximum of 72 characters   ---->|
+# - Explain WHAT and WHY this change was made (not HOW)
+# - Use bullet points for multiple line items
+# - Separate paragraphs with blank lines
+
+
+# <footer>
+# - Reference any issues or PRs, e.g., "Fixes #123", "Related to #456"
+# - Add co-authors if applicable: "Co-authored-by: name <name@example.com>"
+
+# Types:
+#   feat     (new feature)
+#   fix      (bug fix)
+#   docs     (changes to documentation)
+#   style    (formatting, missing semicolons, etc; no code change)
+#   refactor (refactoring production code)
+#   test     (adding missing tests, refactoring tests)
+#   perf     (performance improvements)
+#   chore    (updating grunt tasks etc; no production code change)
+
+# Example:
+# feat: add user authentication feature
+#
+# - Implement JWT-based authentication system
+# - Add login and registration endpoints
+# - Update frontend components to handle auth state
+#
+# Fixes #123
+# Co-authored-by: Jane Doe <jane@example.com> 
