@@ -162,3 +162,6 @@ cython_debug/
 #.idea/
 
 example/*
+
+# Ignore the Twitter accounts CSV file
+scraper/account.csv
