@@ -96,45 +96,113 @@ def fetch_tweets(username: str, since_id: str = None) -> List[dict]:
         list: List of tweet objects.
     """
     try:
-        query = f"from:{username} -is:retweet"
         tweets = []
         
         try:
-            paginator = tweepy.Paginator(
-                client.search_recent_tweets,
-                query=query,
-                tweet_fields=['id', 'text', 'created_at'],
-                since_id=since_id,
-                max_results=100
-            )
+            # First get user ID from username
+            user = client.get_user(username=username)
+            if not user.data:
+                logger.error(f"Could not find user @{username}")
+                return []
             
-            for response in paginator:
-                if response and response.data:
+            user_id = user.data.id
+            logger.info(f"Found user ID for @{username}: {user_id}")
+            
+            # Parameters for pagination
+            pagination_token = None
+            page_count = 0
+            max_pages = 1000  # Adjust this based on how many tweets you want to fetch
+            
+            while True:
+                try:
+                    # Get tweets for current page
+                    response = client.get_users_tweets(
+                        user_id,
+                        tweet_fields=['id', 'text', 'created_at', 'public_metrics', 'referenced_tweets'],
+                        pagination_token=pagination_token,
+                        since_id=since_id,
+                        max_results=100,  # Maximum allowed by Twitter API
+                        exclude=['retweets']
+                    )
+                    
+                    if not response.data:
+                        break
+                    
+                    page_count += 1
+                    logger.info(f"Processing page {page_count} for @{username}")
+                    
                     for tweet in response.data:
+                        # Check if it's a retweet or quote tweet
+                        is_retweet = False
+                        is_quote = False
+                        if tweet.referenced_tweets:
+                            for ref in tweet.referenced_tweets:
+                                if ref.type == 'retweeted':
+                                    is_retweet = True
+                                elif ref.type == 'quoted':
+                                    is_quote = True
+                        
+                        tweet_type = 'retweet' if is_retweet else 'quote' if is_quote else 'original'
+                        
                         tweets.append({
                             'id': tweet.id,
                             'text': tweet.text.replace('\n', ' ').replace('\r', ' '),
-                            'created_at': tweet.created_at.isoformat()
+                            'created_at': tweet.created_at.isoformat(),
+                            'type': tweet_type,
+                            'retweet_count': tweet.public_metrics['retweet_count'],
+                            'reply_count': tweet.public_metrics['reply_count'],
+                            'like_count': tweet.public_metrics['like_count'],
+                            'quote_count': tweet.public_metrics['quote_count']
                         })
-                    logger.info(f"Fetched batch of {len(response.data)} tweets for @{username}")
                     
-                    # Save tweets in batches to prevent data loss during rate limiting
-                    if len(tweets) >= 100:
+                    logger.info(f"Fetched {len(response.data)} tweets from page {page_count} for @{username}")
+                    
+                    # Save tweets in batches
+                    if len(tweets) >= 500:
+                        logger.info(f"Saving batch of {len(tweets)} tweets for @{username}")
                         save_tweets(username, tweets)
                         tweets = []
-                        
+                    
+                    # Check if we have more pages
+                    if not response.meta or 'next_token' not in response.meta:
+                        logger.info(f"No more pages available for @{username}")
+                        break
+                    
+                    # Update pagination token for next page
+                    pagination_token = response.meta['next_token']
+                    
+                    # Check if we've reached max pages
+                    if page_count >= max_pages:
+                        logger.info(f"Reached maximum page limit ({max_pages}) for @{username}")
+                        break
+                    
+                    # Add delay between pages to respect rate limits
+                    time.sleep(1)  # 1 second delay between pages
+                    
+                except tweepy.TooManyRequests as e:
+                    logger.warning(f"Rate limit hit on page {page_count} for @{username}")
+                    if tweets:
+                        save_tweets(username, tweets)
+                    reset_time = int(e.response.headers.get('x-rate-limit-reset', time.time() + 900))
+                    wait_time = reset_time - int(time.time()) + 5
+                    logger.warning(f"Waiting {wait_time} seconds for rate limit reset...")
+                    time.sleep(wait_time)
+                    continue
+            
+            # Save any remaining tweets
+            if tweets:
+                logger.info(f"Saving final batch of {len(tweets)} tweets for @{username}")
+                save_tweets(username, tweets)
+            
+            logger.info(f"Completed fetching tweets for @{username}. Total pages processed: {page_count}")
+            return tweets
+            
         except tweepy.TooManyRequests as e:
-            logger.warning(f"Rate limit hit while fetching tweets for @{username}. Saving current batch.")
-            if tweets:  # Save any tweets we got before the rate limit
+            logger.warning(f"Rate limit hit while fetching tweets for @{username}")
+            if tweets:
                 save_tweets(username, tweets)
             raise e
             
-        # Save any remaining tweets
-        if tweets:
-            save_tweets(username, tweets)
-            
-        return tweets
-        
     except tweepy.TweepyException as e:
         logger.error(f"Tweepy error occurred for @{username}: {e}")
     except Exception as e:
@@ -157,7 +225,9 @@ def save_tweets(username: str, tweets: list):
     
     try:
         with open(file_path, mode='a', encoding='utf-8', newline='') as file:
-            writer = csv.DictWriter(file, fieldnames=['id', 'text', 'created_at'])
+            writer = csv.DictWriter(file, fieldnames=['id', 'text', 'created_at', 'type', 
+                                                    'retweet_count', 'reply_count', 
+                                                    'like_count', 'quote_count'])
             if not file_exists:
                 writer.writeheader()
             for tweet in tweets:
@@ -200,8 +270,8 @@ def main():
     
     logger.info(f"Found {len(accounts)} accounts to process: {', '.join(accounts)}")
     
-    # Reduce number of workers to avoid hitting rate limits too quickly
-    max_workers = 3
+    # Reduce number of workers further
+    max_workers = 2  # Reduced from 3 to 2
     logger.info(f"Initializing thread pool with {max_workers} workers")
     
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -215,9 +285,11 @@ def main():
                 future.result()
                 completed += 1
                 logger.info(f"Progress: {completed}/{total} accounts processed")
+                # Add delay between accounts
+                time.sleep(5)  # 5 second delay between accounts
             except tweepy.TooManyRequests:
                 logger.warning("Rate limit reached. Waiting before continuing...")
-                time.sleep(900)  # Wait 15 minutes for rate limit reset
+                time.sleep(905)  # 15 minutes + 5 seconds buffer
             except Exception as exc:
                 logger.error(f"Exception for @{username}: {exc}")
             

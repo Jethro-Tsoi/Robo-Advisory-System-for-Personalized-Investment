@@ -1,0 +1,74 @@
+name: financial_kol_crawler
+version: 1.0
+
+sources:
+  twitter:
+    type: social_media
+    url_patterns:
+      - 'https://twitter.com/i/flow/login'  # Start with login page
+      - 'https://twitter.com/{username}'     # Then crawl user profiles
+    selectors:
+      tweet_text: 'article[data-testid="tweet"] div[data-testid="tweetText"]'
+      user_name: 'div[data-testid="User-Name"] > div > div a[tabindex="-1"] span'
+      timestamp: 'article[data-testid="tweet"] time'
+      likes: 'article[data-testid="tweet"] div[data-testid="like"] span[data-testid="app-text-transition-container"]'
+      retweets: 'article[data-testid="tweet"] div[data-testid="retweet"] span[data-testid="app-text-transition-container"]'
+    auth:
+      username: "${TWITTER_USER}"
+      password: "${TWITTER_PASS}"
+    rate_limits:
+      requests_per_minute: 30
+      pause_between_requests: 2
+
+  seekingalpha:
+    type: financial_blog
+    url_patterns:
+      - 'https://seekingalpha.com/market-news'
+      - 'https://seekingalpha.com/analysis/*'
+    selectors:
+      article_title: 'h1[data-test-id="post-title"]'
+      article_author: 'a[data-test-id="post-author"]'
+      article_date: 'time[data-test-id="post-date"]'
+      article_content: 'div[data-test-id="post-content"]'
+      comments: 'div[data-test-id="comments-section"] > div'
+    auth:
+      username: "${SA_USER}"
+      password: "${SA_PASS}"
+    rate_limits:
+      requests_per_minute: 20
+      pause_between_requests: 3
+
+validation:
+  content:
+    min_length: 50
+    max_length: 50000
+  required_fields:
+    - user_name
+    - tweet_text
+    - timestamp
+  author_metrics:
+    min_followers: 1000
+    min_engagement: 100
+
+output:
+  format: csv
+  directory: data/crawled
+  options:
+    partition_by: source
+    date_format: '%Y%m%d'
+
+quality_metrics:
+  - type: completeness
+    threshold: 0.95
+  - type: uniqueness
+    fields: ['content']
+    threshold: 0.98
+  - type: author_reputation
+    min_score: 0.7
+
+logging:
+  level: INFO
+  directory: ../logs/crawler
+  rotate:
+    max_size: 10MB
+    backup_count: 5
