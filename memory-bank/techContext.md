@@ -3,9 +3,12 @@
 ## Current Infrastructure
 
 ### Data Collection
-- Twitter API integration via tweepy
+- Twitter API integration via tweepy with:
+  - Smart rate limit tracking per endpoint
+  - Batch processing with parallel execution
+  - Dynamic quota management
 - Structured data storage in CSV format
-- Logging system for monitoring and debugging
+- Enhanced logging system for monitoring and debugging
 
 ### Data Processing
 - NER (Named Entity Recognition) pipeline using BERT
@@ -16,6 +19,7 @@
 
 ### Core Technologies
 - Python: Primary development language
+- tweepy: Twitter API client with rate limit handling
 - crawlforai: Multi-source data collection
 - pandas: Data manipulation and analysis
 - transformers: NLP tasks and model integration
@@ -25,6 +29,7 @@
 1. Data Collection System
    ```
    scraper/
+   ├── twitter_api.py      # Enhanced Twitter scraper
    ├── crawler_config/     # crawlforai configurations
    ├── validators/         # Data validation rules
    └── requirements.txt    # Dependencies
@@ -69,7 +74,10 @@
    - Performance analytics
 
 ## Technical Considerations
-- Rate limiting and API quotas
+- Rate Limiting and API Quotas:
+  - Per-endpoint quota tracking
+  - Dynamic rate window management
+  - Batch processing optimization
 - Data storage scalability
 - Model deployment efficiency
 - Real-time processing capabilities
