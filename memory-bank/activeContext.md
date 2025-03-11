@@ -8,6 +8,11 @@ Building a high-accuracy financial KOL sentiment dataset and trading strategy mo
 - Implemented batch processing for optimal API usage
 - Improved error handling and quota management
 - Data storage and logging systems established
+- Optimized X API v2 integration to handle the 3,200 tweet limit per user
+- Added comprehensive documentation about X API limitations
+- Implemented monthly quota tracking for free tier (100 reads/month)
+- Added intelligent distribution of quota across accounts
+- Optimized request pacing to respect the 1 request per 15 minutes limit
 
 ## Active Work Streams
 
@@ -20,6 +25,8 @@ gantt
     Smart Rate Limiting     :done, t1, 2025-03-04, 1d
     Batch Processing       :done, t2, after t1, 1d
     Error Handling        :done, t3, after t2, 1d
+    X API Limit Handling  :done, t4, 2025-03-10, 1d
+    Free Tier Optimization :done, t5, 2025-03-10, 1d
     section Crawler Setup
     Configure crawlforai   :a1, 2025-03-07, 5d
     Setup Validators      :a2, after a1, 3d
@@ -52,6 +59,10 @@ gantt
 - Configure crawlforai for financial data sources
 - Set up data validation and quality metrics
 - Monitor and adjust rate limit strategies
+- Work within the X API constraint of 3,200 tweets per user
+- Manage the free tier limit of 100 reads per month
+- Efficiently distribute quota across multiple accounts
+- Implement strategic collection scheduling to maximize value from limited quota
 
 ### 2. Sentiment Analysis
 - Developing accurate labeling methodology
