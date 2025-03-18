@@ -98,11 +98,11 @@ endpoint_limits = {
 
 # Monthly quota tracking
 monthly_quota = {
-    'reads_used': 0,
+    'reads_used': 41,
     'reads_limit': FREE_TIER_MONTHLY_READS,
     'posts_used': 0,
     'posts_limit': FREE_TIER_MONTHLY_POSTS,
-    'reset_date': None  # Will be set on first run
+    'reset_date': datetime.datetime(2025, 3, 20).timestamp()  # Store as timestamp for consistent comparison
 }
 
 def initialize_rate_limits():
@@ -111,17 +111,6 @@ def initialize_rate_limits():
     for endpoint in endpoint_limits:
         endpoint_limits[endpoint]['reset_time'] = current_time + endpoint_limits[endpoint]['window_size']
         endpoint_limits[endpoint]['remaining'] = endpoint_limits[endpoint]['max_requests']
-    
-    # Initialize monthly quota if not set
-    if not monthly_quota['reset_date']:
-        # Set reset date to the 1st of next month
-        today = datetime.datetime.now()
-        if today.month == 12:
-            next_month = datetime.datetime(today.year + 1, 1, 1)
-        else:
-            next_month = datetime.datetime(today.year, today.month + 1, 1)
-        monthly_quota['reset_date'] = next_month.timestamp()
-        logger.info(f"Monthly quota reset date set to {next_month.strftime('%Y-%m-%d')}")
 
 # Session management
 session_metrics = {
@@ -194,7 +183,8 @@ def check_monthly_quota(read_count=0):
         monthly_quota['reset_date'] = next_month.timestamp()
         monthly_quota['reads_used'] = 0
         monthly_quota['posts_used'] = 0
-        logger.info(f"Monthly quota reset. Next reset on {next_month.strftime('%Y-%m-%d')}")
+        next_month_str = datetime.datetime.fromtimestamp(monthly_quota['reset_date']).strftime('%Y-%m-%d')
+        logger.info(f"Monthly quota reset. Next reset on {next_month_str}")
     
     # Update and check quota
     if read_count > 0:
@@ -234,63 +224,46 @@ def get_last_tweet_id(username: str) -> Optional[str]:
         logger.error(f"Error reading last tweet ID for @{username}: {e}")
     return None
 
-def fetch_tweets(username: str, since_id: Optional[str] = None, max_tweets: int = 100) -> List[Dict[str, Any]]:
+def fetch_tweets(username: str, since_id: Optional[str] = None, max_tweets: int = 3200) -> List[Dict[str, Any]]:
     """
-    Fetch tweets for a given Twitter username using X API v2 (formerly Twitter API).
+    Fetch tweets for a given username using Twitter API v2.
     
     Args:
-        username (str): Twitter handle (without @).
-        since_id (str): Returns results with an ID greater than (that is, more recent than) the specified ID.
-        max_tweets (int): Maximum number of tweets to fetch (default: 100, respects free tier limits)
+        username: Twitter username to fetch tweets for
+        since_id: Only return tweets newer than this ID (optional)
+        max_tweets: Maximum number of tweets to fetch (default: 3200, the API maximum)
         
     Returns:
-        list: List of tweet objects.
+        List of tweet objects
     """
+    all_tweets = []
+    
     try:
-        tweets = []
-        current_backoff = INITIAL_BACKOFF
+        # First lookup the user ID from the username
+        response = client.get_user(username=username)
+        if not response or not response.data:
+            logger.warning(f"Could not find user @{username}")
+            return []
         
-        # Check monthly quota before making any requests
-        # Each API request counts as 1 read, not each tweet
-        # Calculate how many requests we'll need
-        requests_needed = (max_tweets + 99) // 100  # Ceiling division to get number of requests
+        user_id = response.data.id
+        logger.info(f"Found user ID for @{username}: {user_id}")
         
-        if not check_monthly_quota(requests_needed):
-            logger.warning(f"Monthly read quota would be exceeded. Limiting to available quota.")
-            available_requests = max(0, monthly_quota['reads_limit'] - monthly_quota['reads_used'])
-            max_tweets = available_requests * 100  # Each request can fetch up to 100 tweets
-            if max_tweets <= 0:
-                logger.error("Monthly read quota already exhausted. Cannot fetch tweets.")
-                return []
-        
-        try:
-            # First get user ID from username
-            wait_for_rate_limit('user_lookup')
-            user = client.get_user(username=username)
-            if not user.data:
-                logger.error(f"Could not find user @{username}")
-                return []
-            
-            update_rate_limits(user, 'user_lookup')
-            user_id = user.data.id
-            logger.info(f"Found user ID for @{username}: {user_id}")
-            
-            # Parameters for pagination
+        # Now fetch tweets for this user
+        if user_id:
             pagination_token = None
             page_count = 0
             tweet_count = 0
-            max_results_per_request = min(100, max_tweets)  # Maximum 100 per request
+            max_pages = min(32, (max_tweets + 99) // 100)  # Twitter allows max 32 pages, each with up to 100 tweets
             
-            while tweet_count < max_tweets:
+            while page_count < max_pages and tweet_count < max_tweets:
                 try:
                     # Wait for rate limit and get tweets
                     wait_for_rate_limit('user_timeline')
                     
-                    # Calculate how many tweets to request in this batch
-                    remaining_tweets = max_tweets - tweet_count
-                    current_max_results = min(max_results_per_request, remaining_tweets)
+                    # Always request 100 tweets per page (Twitter API maximum)
+                    current_max_results = 100
                     
-                    logger.info(f"Requesting {current_max_results} tweets for @{username} (page {page_count+1})")
+                    logger.info(f"Requesting {current_max_results} tweets for @{username} (page {page_count+1}/{max_pages})")
                     
                     response = client.get_users_tweets(
                         user_id,
@@ -334,15 +307,15 @@ def fetch_tweets(username: str, since_id: Optional[str] = None, max_tweets: int 
                             'quote_count': tweet.public_metrics['quote_count']
                         })
                     
-                    tweets.extend(batch_tweets)
+                    all_tweets.extend(batch_tweets)
                     tweet_count += len(batch_tweets)
                     logger.info(f"Fetched {len(batch_tweets)} tweets from page {page_count} for @{username} (Total: {tweet_count}/{max_tweets})")
                     
                     # Save tweets in smaller batches to avoid data loss
-                    if len(tweets) >= 50:  # Save more frequently with smaller batches
-                        logger.info(f"Saving batch of {len(tweets)} tweets for @{username}")
-                        save_tweets(username, tweets)
-                        tweets = []
+                    if len(all_tweets) >= 50:  # Save more frequently with smaller batches
+                        logger.info(f"Saving batch of {len(all_tweets)} tweets for @{username}")
+                        save_tweets(username, all_tweets)
+                        all_tweets = []
                     
                     # Check if we have more pages
                     if not response.meta or 'next_token' not in response.meta:
@@ -365,9 +338,9 @@ def fetch_tweets(username: str, since_id: Optional[str] = None, max_tweets: int 
                     
                 except tweepy.TooManyRequests as e:
                     logger.warning(f"Rate limit hit on page {page_count} for @{username}")
-                    if tweets:
-                        save_tweets(username, tweets)
-                        tweets = []
+                    if all_tweets:
+                        save_tweets(username, all_tweets)
+                        all_tweets = []
                     
                     # Use our rate limit tracking
                     endpoint_limits['user_timeline']['remaining'] = 0
@@ -379,26 +352,19 @@ def fetch_tweets(username: str, since_id: Optional[str] = None, max_tweets: int 
                 
                 except Exception as e:
                     logger.error(f"Error on page {page_count} for @{username}: {str(e)}")
-                    if tweets:
-                        save_tweets(username, tweets)
-                        tweets = []
-                    time.sleep(current_backoff)
-                    current_backoff = min(current_backoff * BACKOFF_FACTOR, MAX_BACKOFF)
+                    if all_tweets:
+                        save_tweets(username, all_tweets)
+                        all_tweets = []
+                    time.sleep(INITIAL_BACKOFF)
                     continue
             
             # Save any remaining tweets
-            if tweets:
-                logger.info(f"Saving final batch of {len(tweets)} tweets for @{username}")
-                save_tweets(username, tweets)
+            if all_tweets:
+                logger.info(f"Saving final batch of {len(all_tweets)} tweets for @{username}")
+                save_tweets(username, all_tweets)
             
             logger.info(f"Completed fetching tweets for @{username}. Total pages processed: {page_count}")
-            return tweets
-            
-        except tweepy.TooManyRequests as e:
-            logger.warning(f"Rate limit hit while fetching tweets for @{username}")
-            if tweets:
-                save_tweets(username, tweets)
-            raise e
+            return all_tweets
             
     except tweepy.TweepyException as e:
         logger.error(f"Tweepy error occurred for @{username}: {e}")
@@ -535,7 +501,7 @@ def main():
     
     # Calculate tweets per account based on available quota
     available_quota = monthly_quota['reads_limit'] - monthly_quota['reads_used']
-    tweets_per_account = min(100, available_quota // max(1, len(accounts)))
+    tweets_per_account = 3200
     
     # Process accounts one at a time to avoid rate limit issues
     process_account_batch(accounts, max_tweets_per_account=tweets_per_account)
