@@ -1,5 +1,25 @@
 # Technical Context
 
+## Development Environment
+
+### Docker Configuration
+1. Core Services
+   - Frontend container (Next.js)
+   - Backend container (FastAPI)
+   - Development tools container
+
+2. Build System
+   - Makefile for common tasks
+   - Multi-stage Dockerfiles
+   - Development/Production configs
+   - Hot reloading support
+
+3. Resource Management
+   - Volume mounting
+   - Container networking
+   - Memory/CPU limits
+   - GPU access (optional)
+
 ## Technology Stack
 
 ### Machine Learning
@@ -26,11 +46,10 @@
    - Uvicorn >= 0.27.0
    - Pydantic >= 2.5.3
 
-2. API Structure
-   - RESTful endpoints
-   - Async request handling
-   - JSON response format
-   - OpenAPI documentation
+2. Package Management
+   - uv for fast installation
+   - Docker-based dependency management
+   - Version pinning
 
 ### Frontend
 1. Core
@@ -48,24 +67,41 @@
    - Zustand
    - React Query for API state
 
-### Development Environment
-1. Containerization
-   - Docker
-   - Docker Compose
-   - Multi-stage builds
-   - Development/Production configs
+## Build and Deployment
 
-2. Version Control
-   - Git
-   - Feature branching
-   - Semantic versioning
+### Development Workflow
+1. Local Development
+   ```bash
+   make up        # Start services
+   make dev       # Start with tools
+   make jupyter   # Access notebooks
+   ```
 
-3. Code Quality
-   - TypeScript strict mode
-   - ESLint
-   - Prettier
-   - Black (Python)
-   - isort
+2. Testing
+   ```bash
+   make test-backend
+   make test-frontend
+   ```
+
+3. Cleanup
+   ```bash
+   make clean    # Remove containers
+   make down     # Stop services
+   ```
+
+### Container Architecture
+```
+┌─────────────────┐
+│    Frontend     │
+│    (Next.js)    │
+├─────────────────┤
+│    Backend      │
+│    (FastAPI)    │
+├─────────────────┤
+│  Dev Tools      │
+│  (Optional)     │
+└─────────────────┘
+```
 
 ## System Architecture
 
@@ -99,97 +135,63 @@ Client Request → FastAPI Router → Model Service → Response
    - Early stopping patience: 3
    - Multi-metric monitoring
 
-### API Performance
-1. Caching Strategy
-   - Model predictions
-   - Static assets
-   - API responses
+### Container Optimization
+1. Resource Limits
+   - Memory constraints
+   - CPU allocation
+   - Volume management
+   - Network configuration
 
-2. Load Handling
-   - Async processing
-   - Batch predictions
-   - Rate limiting
-
-### Frontend Optimization
-1. Next.js Features
-   - Server components
-   - Static optimization
-   - Image optimization
-
-2. Performance Metrics
-   - First contentful paint
-   - Time to interactive
-   - Core Web Vitals
+2. Development Performance
+   - Hot reloading
+   - Volume mounts
+   - Cache utilization
+   - Build optimization
 
 ## Security Measures
 
-### API Security
-1. Authentication
-   - JWT tokens
-   - API keys
-   - Rate limiting
+### Container Security
+1. Resource Isolation
+   - Network segmentation
+   - Volume permissions
+   - Resource limits
+   - Environment separation
 
-2. Data Protection
-   - Input validation
-   - CORS policies
-   - Request sanitization
-
-### Model Security
-1. Input Validation
-   - Text length limits
-   - Content filtering
-   - Rate limiting
-
-2. Output Protection
-   - Confidence thresholds
-   - Response filtering
-   - Error handling
+2. Access Control
+   - API authentication
+   - Development restrictions
+   - Environment variables
+   - Secrets management
 
 ## Monitoring and Logging
 
-### System Metrics
-1. Model Performance
-   - Inference time
-   - Memory usage
-   - GPU utilization
+### Container Monitoring
+1. Health Checks
+   ```yaml
+   healthcheck:
+     test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+     interval: 30s
+     timeout: 10s
+     retries: 3
+   ```
 
-2. API Metrics
-   - Response times
-   - Error rates
-   - Request volumes
-
-### Application Logs
-1. Components
-   - Model predictions
-   - API requests
-   - Frontend errors
-
-2. Log Levels
-   - DEBUG: Development details
-   - INFO: Standard operations
-   - WARNING: Potential issues
-   - ERROR: Critical problems
+2. Resource Tracking
+   - Container stats
+   - Volume usage
+   - Network metrics
+   - Application logs
 
 ## Testing Strategy
 
-### Unit Tests
-1. Frontend
+### Development Testing
+1. Local Testing
+   - Hot reload testing
    - Component testing
-   - Hook testing
-   - State management
+   - API testing
+   - Integration tests
 
-2. Backend
-   - API endpoints
-   - Model utilities
-   - Data processing
-
-### Integration Tests
-1. API Testing
-   - Endpoint integration
-   - Data flow
-   - Error handling
-
-2. System Testing
-   - End-to-end flows
-   - Performance testing
-   - Load testing
+2. Container Testing
+   - Build verification
+   - Resource usage
+   - Network connectivity
+   - Volume persistence

@@ -10,7 +10,55 @@ This project implements a comprehensive financial sentiment analysis system usin
 - 🎯 7-class sentiment classification
 - 📈 Comprehensive model evaluation metrics
 - 🚀 Modern web interface with TypeScript and Tailwind CSS
-- 🐳 Docker-based development environment
+- 🐳 Containerized development environment
+
+## Prerequisites
+
+- Docker and Docker Compose
+- Make (optional, but recommended)
+- Google Cloud API key (for Gemini)
+
+## Quick Start
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/financial-sentiment.git
+cd financial-sentiment
+```
+
+2. Set up the environment:
+```bash
+make setup
+```
+
+3. Configure your API keys in `.env`
+
+4. Start the development environment:
+```bash
+make up
+```
+
+## Available Make Commands
+
+```bash
+make help      # Show all available commands
+make up        # Start all services
+make down      # Stop all services
+make build     # Build/rebuild services
+make dev       # Start with development tools
+make clean     # Remove all containers and volumes
+make logs      # View service logs
+make jupyter   # Start Jupyter notebook server
+```
+
+## Development Environment
+
+The following services will be available:
+
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API Documentation: http://localhost:8000/docs
+- Jupyter Notebooks: http://localhost:8888
 
 ## Project Structure
 
@@ -27,131 +75,80 @@ This project implements a comprehensive financial sentiment analysis system usin
 ├── web/                  # Web application
 │   ├── backend/         # FastAPI backend
 │   └── frontend/        # Next.js frontend
-└── setup.sh             # Setup script
-```
-
-## Getting Started
-
-### Prerequisites
-
-- Python 3.9+
-- Node.js 18+
-- Docker and Docker Compose (optional)
-- Google Cloud API key (for Gemini)
-
-### Quick Start
-
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/financial-sentiment.git
-cd financial-sentiment
-```
-
-2. Run the setup script:
-```bash
-./setup.sh
-```
-
-3. Configure your environment:
-   - Add your Google Cloud API key to `.env`
-   - Adjust other settings as needed
-
-4. Start the development environment:
-```bash
-cd web
-./dev.sh
-```
-
-### Manual Setup
-
-If you prefer to set up components individually:
-
-1. Python Environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # Windows: .\venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-2. Frontend:
-```bash
-cd web/frontend
-npm install
-npm run dev
-```
-
-3. Backend:
-```bash
-cd web/backend
-uvicorn main:app --reload
+├── Makefile             # Development commands
+└── docker-compose.yml   # Container configuration
 ```
 
 ## Model Training
 
 ### Data Labeling
 
-1. Run the data labeling notebook:
+1. Start Jupyter server:
 ```bash
-jupyter notebook notebooks/00_data_labeling.ipynb
+make jupyter
 ```
 
-2. Configure your Gemini API key in the notebook
-3. Run all cells to process and label the tweets
+2. Open `notebooks/00_data_labeling.ipynb`
+
+3. Configure your Gemini API key in notebook:
+```python
+os.environ['GOOGLE_API_KEY'] = 'your-api-key'
+```
 
 ### Training Models
 
-#### Gamma 3 with LoRA
+1. Gamma 3 with LoRA:
+- Open `notebooks/02a_gamma3_training_lora.ipynb`
+- Features:
+  - LoRA fine-tuning (r=8, alpha=16)
+  - Multi-metric early stopping
+  - Comprehensive evaluation
 
-1. Run the training notebook:
+2. FinBERT:
+- Open `notebooks/02b_finbert_training.ipynb`
+- Features:
+  - Native fine-tuning
+  - Early stopping
+  - Performance metrics
+
+## Development
+
+### Running Tests
+
 ```bash
-jupyter notebook notebooks/02a_gamma3_training_lora.ipynb
+# Backend tests
+make test-backend
+
+# Frontend tests
+make test-frontend
 ```
 
-Features:
-- LoRA for efficient fine-tuning
-- Multi-metric early stopping
-- Comprehensive evaluation metrics
+### Development Tools
 
-#### FinBERT
-
-1. Run the training notebook:
+Start development environment with additional tools:
 ```bash
-jupyter notebook notebooks/02b_finbert_training.ipynb
+make dev
 ```
 
-Features:
-- Native fine-tuning
-- Early stopping
-- Performance metrics
+This includes:
+- Hot reloading
+- Development containers
+- Debugging tools
+- Live code updates
 
-## Web Interface
+### Making Changes
 
-### Frontend (Next.js + TypeScript)
+1. Frontend:
+- Edit files in `web/frontend/src/`
+- Changes reflect instantly with hot reloading
 
-- Modern React components with TypeScript
-- Tailwind CSS for styling
-- Chart.js for visualizations
-- Real-time model comparison
+2. Backend:
+- Edit files in `web/backend/`
+- Auto-reloads with code changes
 
-### Backend (FastAPI)
-
-API Endpoints:
-- GET `/metrics` - Model performance metrics
-- GET `/confusion_matrices` - Confusion matrices
-- GET `/sample_predictions` - Sample predictions
-- GET `/performance_comparison` - Model comparison
-
-## Docker Development
-
-1. Start containers:
-```bash
-docker-compose up --build
-```
-
-2. Access services:
-- Frontend: http://localhost:3000
-- Backend: http://localhost:8000
-- API Docs: http://localhost:8000/docs
+3. Notebooks:
+- Edit in Jupyter interface
+- Auto-saves enabled
 
 ## Contributing
 
@@ -160,14 +157,31 @@ docker-compose up --build
 3. Make your changes
 4. Submit a pull request
 
+## Monitoring
+
+View service logs:
+```bash
+make logs
+```
+
+Monitor specific service:
+```bash
+make logs service=backend  # or frontend
+```
+
+## Cleanup
+
+Remove all containers and volumes:
+```bash
+make clean
+```
+
 ## License
 
 MIT License - see LICENSE file for details
 
-## Acknowledgments
+## Need Help?
 
-- Google's Gamma 3 model
-- FinBERT team
-- HuggingFace Transformers library
-- FastAPI framework
-- Next.js team
+1. Run `make help` to see all available commands
+2. Check the API documentation at http://localhost:8000/docs
+3. Visit the frontend at http://localhost:3000
