@@ -1,0 +1,150 @@
+# Financial Sentiment Analysis Project Intelligence
+
+## Project Patterns
+
+### Development Workflow
+- Docker-centric development using `make` commands
+- Use `make up` for regular development, `make dev` for additional tools
+- Config via `.env` file (copy from `.env.example`)
+- Jupyter notebooks accessible via `make jupyter`
+
+### Code Organization
+- Python files use snake_case
+- TypeScript component files use PascalCase
+- CSS files use kebab-case
+- Jupyter notebooks use numbered prefixes
+
+### Frontend Patterns
+- Next.js 14 with TypeScript and Tailwind CSS
+- Component structure follows standard pattern
+- React Query for API state
+- Zustand for UI state
+
+### Backend Patterns
+- FastAPI with organized router structure
+- Model services for prediction logic
+- Consistent error handling pattern
+- Documentation for all endpoints
+
+### API Conventions
+- Standard response format with success/error fields
+- Clear endpoint structure (GET /metrics, POST /analyze, etc.)
+- Error handling with proper status codes
+- Validation for all inputs
+
+### Model Training
+- LoRA configuration for Gamma 3 (r=8, alpha=16)
+- Multi-metric early stopping for better quality
+- Comprehensive evaluation with multiple metrics
+- 7-class sentiment classification
+
+## Project Intelligence
+
+### Critical Paths
+- Model training in notebooks/
+- Backend API in web/backend/
+- Frontend interface in web/frontend/
+- Docker configuration for development environment
+
+### Development Setup
+- Environment setup requires Docker and Make
+- Google API key required for Gemini integration
+- Container-based workflow with hot reloading
+- Testing via make test-backend and make test-frontend
+
+### Known Patterns
+- 7-class sentiment classification system
+- Two model approach (Gamma 3 and FinBERT) for comparison
+- Data labeling with Gemini API
+- Visualization-heavy frontend
+
+### User Preferences
+- Clear documentation for all features
+- Container-based development for consistency
+- Modern web interface with TypeScript
+- Performance-focused model training
+
+### Recent Evolution
+- Moved from script-based setup to Makefile
+- Enhanced Docker configuration
+- Added development tools container
+- Improved build system and cleanup procedures
+
+### Challenges
+- Balancing model performance with resource usage
+- Ensuring consistent development environment
+- Maintaining performance in containerized setup
+- Handling model versioning effectively
+
+## Model Selection Principles
+1. Prefer models with demonstrated performance in financial text analysis
+2. When fine-tuning foundation models, use parameter-efficient techniques like LoRA
+3. Quantitative evaluation should include multiple metrics (accuracy, F1, MCC, etc.)
+4. Maintain consistent evaluation methodology across all models for fair comparison
+5. Use Google's Gemma 3 12B as our primary model due to its superior performance on language understanding tasks
+
+## Code Organization
+1. Keep notebook code consistent between model implementations for easy comparison
+2. Maintain clear separation between data preparation, model training, and evaluation
+3. Log all model metrics to CSV files for later analysis
+4. Use descriptive variable names that reflect domain concepts
+5. Include markdown cells for all major notebook sections
+
+## Development Workflow
+1. Use Docker for all development to ensure reproducibility
+2. Run notebooks via `make jupyter` to ensure consistent environment
+3. All model checkpoints should be stored in `/models/{model_name}`
+4. Training with LoRA requires GPU acceleration; use Google Colab if local resources insufficient
+5. Model implementation should follow the same structure for all models (LoRA config, early stopping, etc.)
+
+## Naming Conventions
+1. Notebooks: `{number}_{purpose}.ipynb` (e.g., `02a_gamma3_training_lora.ipynb`)
+2. Models: `{model_name}_lora_adapter` for LoRA models, `{model_name}_full` for full fine-tuning
+3. Data files: `all_labeled_tweets.csv` for the main dataset
+4. Metrics files: `metrics.csv` and `training_history.csv`
+
+## Implementation Details
+1. LoRA Configuration
+   - r=8 (rank)
+   - alpha=16
+   - target_modules=["q_proj", "v_proj"]
+   - task_type=TaskType.SEQ_CLS
+
+2. Training Parameters
+   - Gemma 3: batch_size=8, learning_rate=1e-5, 8-bit quantization
+   - Gamma 3: batch_size=16, learning_rate=2e-5
+   - FinBERT: batch_size=32, learning_rate=3e-5
+   - All models: early_stopping(patience=3)
+
+3. Model Serving
+   - Load adapters instead of full models
+   - Use device_map="auto" for automatic device placement
+   - Implement caching for repeated predictions
+
+## Frontend Integration
+1. Use React Query for API communication
+2. Implement loading states for all model predictions
+3. Display confidence scores alongside predictions
+4. Include model comparison visualization
+5. Allow users to select model for prediction
+
+## Backend Implementation
+1. Implement model versioning system
+2. API should accept batch predictions
+3. Include performance metrics in response
+4. Cache predictions for repeated queries
+5. Implement proper error handling
+
+## Deployment Considerations
+1. Use Docker-based deployment
+2. Implement health checks for all services
+3. Monitor resource usage, especially GPU memory
+4. Set up logging for all API requests
+5. Implement rate limiting for public endpoints
+
+## Documentation Standards
+1. Include comprehensive docstrings for all functions
+2. Document model architecture and training details
+3. Provide usage examples in README
+4. Keep memory-bank up-to-date with all decisions
+5. Document performance metrics for all models 

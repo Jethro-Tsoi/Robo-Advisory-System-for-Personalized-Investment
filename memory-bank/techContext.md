@@ -24,6 +24,12 @@
 
 ### Machine Learning
 1. Models
+   - Google Gemma 3
+     - 12B parameter model
+     - LoRA fine-tuning (r=8, alpha=16)
+     - Target modules: q_proj, v_proj
+     - 8-bit quantization for efficient training
+     - Gradient clipping for training stability
    - Google Gamma 3
      - LoRA fine-tuning (r=8, alpha=16)
      - Target modules: q_proj, v_proj
@@ -123,15 +129,23 @@ Client Request → FastAPI Router → Model Service → Response
 ## Performance Considerations
 
 ### Model Optimization
-1. LoRA Parameters
+1. Gemma 3 Optimization
+   - 8-bit quantization
+   - LoRA for parameter-efficient fine-tuning
+   - Gradient clipping (max_norm=1.0)
+   - Smaller batch size (8)
+   - Lower learning rate (1e-5)
+   - Linear warmup scheduler
+
+2. LoRA Parameters
    - Rank: 8
    - Alpha: 16
    - Target modules: attention layers
    - Dropout: 0.1
 
-2. Training
-   - Batch size: 16
-   - Learning rate: 2e-5
+3. Training
+   - Batch size: 8-16 (model dependent)
+   - Learning rate: 1e-5 to 2e-5
    - Early stopping patience: 3
    - Multi-metric monitoring
 
