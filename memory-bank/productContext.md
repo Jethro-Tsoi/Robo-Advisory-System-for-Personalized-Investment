@@ -1,147 +1,135 @@
 # Product Context
 
-## Problem Statement
-The financial markets are heavily influenced by KOL (Key Opinion Leader) sentiments, but existing sentiment analysis tools often fail to:
-1. Accurately capture the nuanced opinions of influential market voices
-2. Integrate sentiment data with traditional market indicators
-3. Translate sentiment analysis into actionable trading strategies
+## Overview
+The Financial Sentiment Analysis System serves as a comprehensive solution for analyzing market sentiment in financial tweets, leveraging advanced language models.
 
-## Solution Overview
-PIRAS (Predictive Investment Research and Analysis System) bridges these gaps by:
+## Target Users
+1. Financial Analysts
+2. Investment Researchers
+3. Data Scientists
+4. Market Researchers
+5. Financial Institutions
 
-### 1. High-Quality Sentiment Dataset
-```mermaid
-graph LR
-    KOL[KOL Content] --> DC[Data Collection]
-    DC --> SL[Sentiment Labeling]
-    SL --> QA[Quality Assurance]
-    QA --> DS[Dataset]
-```
+## Use Cases
+1. Real-time market sentiment analysis
+2. Historical sentiment trend analysis
+3. Model performance comparison
+4. Automated sentiment labeling
+5. Interactive visualization of results
 
-- Focus on influential financial voices
-- Rigorous labeling methodology
-- Context-aware sentiment analysis
-- Quality verification process
+## Product Features
 
-### 2. Integrated Market Analysis
-```mermaid
-graph TB
-    subgraph Inputs
-        S[Sentiment Data]
-        M[Macro Indicators]
-        F[Financial Metrics]
-    end
-    
-    subgraph Processing
-        S --> AI[AI Analysis]
-        M --> AI
-        F --> AI
-    end
-    
-    subgraph Output
-        AI --> TS[Trading Signals]
-        AI --> RA[Risk Assessment]
-        AI --> MA[Market Analysis]
-    end
-```
+### Sentiment Analysis
+- 7-class sentiment classification
+  - STRONGLY_POSITIVE: Very bullish outlook
+  - POSITIVE: Generally optimistic view
+  - NEUTRAL: Balanced or factual content
+  - NEGATIVE: Generally pessimistic view
+  - STRONGLY_NEGATIVE: Very bearish outlook
+  - NOT_RELATED: Non-financial content
+  - UNCERTAIN: Ambiguous sentiment
 
-### 3. Trading Strategy Framework
-```mermaid
-graph TB
-    subgraph Analysis
-        SA[Sentiment Analysis]
-        MA[Market Analysis]
-        TA[Technical Analysis]
-    end
-    
-    subgraph Strategy
-        SA --> SG[Signal Generation]
-        MA --> SG
-        TA --> SG
-        SG --> RM[Risk Management]
-        RM --> EX[Execution]
-    end
-    
-    subgraph Evaluation
-        EX --> BT[Backtesting]
-        BT --> PM[Performance Metrics]
-        PM --> OP[Strategy Optimization]
-    end
-```
+### Model Integration
+1. Google's Gamma 3
+   - LoRA fine-tuning
+   - Efficient adaptation
+   - Optimized for financial text
+2. FinBERT
+   - Domain-specific pre-training
+   - Financial text understanding
+   - Native fine-tuning
 
-## User Experience Goals
+### Web Interface
+1. Dashboard Features
+   - Real-time sentiment tracking
+   - Model performance metrics
+   - Interactive visualizations
+   - Side-by-side model comparison
+2. API Integration
+   - RESTful endpoints
+   - Real-time predictions
+   - Batch processing capabilities
+   - Performance metrics access
 
-### 1. Data Collection & Labeling
-- Automated content gathering from multiple sources
-- Intuitive labeling interface for analysts
-- Real-time quality metrics
-- Version control for datasets
+## Technical Architecture
 
-### 2. Model Training & Tuning
-- Clear model performance metrics
-- Automated training pipelines
-- Easy parameter adjustment
-- Model comparison tools
+### Frontend
+- Next.js 14
+- TypeScript
+- Tailwind CSS
+- Chart.js visualization
+- Real-time updates
 
-### 3. Strategy Development
-- Interactive strategy builder
-- Real-time performance monitoring
-- Risk management controls
-- Strategy backtesting interface
+### Backend
+- FastAPI
+- Python 3.9+
+- Model serving
+- API endpoints
+- Performance monitoring
 
-## Success Criteria
+### ML Pipeline
+1. Data Processing
+   - Tweet preprocessing
+   - Text normalization
+   - Feature extraction
+2. Model Training
+   - LoRA adaptation
+   - Multi-metric monitoring
+   - Early stopping
 
-### 1. Dataset Quality
-- Labeling accuracy > 90%
-- Coverage of key market events
-- Regular dataset updates
-- Diverse KOL representation
+### Development Environment
+- Docker containerization
+- Automated setup
+- Development tools
+- Testing framework
 
-### 2. Model Performance
-- Sentiment prediction accuracy
-- Processing speed
-- Adaptation to market changes
-- Resource efficiency
+## Success Metrics
+1. Model Performance
+   - Accuracy
+   - F1 Score
+   - ROC-AUC
+   - Cohen's Kappa
+2. System Performance
+   - Response time
+   - Throughput
+   - Resource utilization
+3. User Experience
+   - Interface responsiveness
+   - Visualization clarity
+   - API accessibility
 
-### 3. Trading Strategy
-- Risk-adjusted returns
-- Maximum drawdown limits
-- Strategy robustness
-- Real-world applicability
+## Future Roadmap
 
-## Stakeholder Requirements
+### Short-term
+1. Model versioning system
+2. Advanced visualization features
+3. Real-time API optimization
+4. Automated testing suite
 
-### Data Scientists
-- Clean, well-structured data
-- Comprehensive documentation
-- Efficient training infrastructure
-- Performance analysis tools
+### Medium-term
+1. Additional model integrations
+2. Enhanced batch processing
+3. Custom model training interface
+4. Extended API functionality
 
-### Financial Analysts
-- Intuitive interface
-- Real-time insights
-- Custom analysis capabilities
-- Export functionality
+### Long-term
+1. Multi-language support
+2. Advanced analytics dashboard
+3. Automated model retraining
+4. Enterprise features
 
-### Risk Managers
-- Risk metrics dashboard
-- Alert systems
-- Position monitoring
-- Compliance tools
+## Deployment Strategy
+1. Development Environment
+   - Docker containers
+   - Local development
+   - Testing environment
 
-## Future Enhancements
+2. Staging Environment
+   - Performance testing
+   - Integration testing
+   - User acceptance testing
 
-### Phase 1: Core Functionality
-- Basic sentiment analysis
-- Initial strategy framework
-- Essential monitoring tools
-
-### Phase 2: Advanced Features
-- Multi-model ensemble
-- Advanced risk analytics
-- Strategy optimization tools
-
-### Phase 3: Production Scaling
-- Real-time processing
-- Advanced automation
-- Enterprise integration
+3. Production Environment
+   - Scalable infrastructure
+   - Monitoring systems
+   - Backup procedures

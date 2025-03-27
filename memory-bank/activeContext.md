@@ -1,127 +1,80 @@
-# Active Context
+# Active Development Context
 
-## Current Focus
-Building a high-accuracy financial KOL sentiment dataset and trading strategy model with LLM integration.
+## Project Overview
+Financial sentiment analysis system using Google's Gamma 3 and FinBERT models with a modern web interface.
 
-## Recent Progress
-- Enhanced Twitter data collection with smart rate limiting
-- Implemented batch processing for optimal API usage
-- Improved error handling and quota management
-- Data storage and logging systems established
-- Optimized X API v2 integration to handle the 3,200 tweet limit per user
-- Added comprehensive documentation about X API limitations
-- Implemented monthly quota tracking for free tier (100 reads/month)
-- Added intelligent distribution of quota across accounts
-- Optimized request pacing to respect the 1 request per 15 minutes limit
+## Current Implementation Status
 
-## Active Work Streams
+### 1. Machine Learning Pipeline
+- ✅ Data labeling with Gemini API (7-class classification)
+- ✅ Gamma 3 model with LoRA fine-tuning and early stopping
+- ✅ FinBERT model implementation
+- ✅ Multi-metric evaluation system
 
-### 1. Data Collection Enhancement
-```mermaid
-gantt
-    title Data Collection Enhancement Plan
-    dateFormat  YYYY-MM-DD
-    section Twitter Integration
-    Smart Rate Limiting     :done, t1, 2025-03-04, 1d
-    Batch Processing       :done, t2, after t1, 1d
-    Error Handling        :done, t3, after t2, 1d
-    X API Limit Handling  :done, t4, 2025-03-10, 1d
-    Free Tier Optimization :done, t5, 2025-03-10, 1d
-    section Crawler Setup
-    Configure crawlforai   :a1, 2025-03-07, 5d
-    Setup Validators      :a2, after a1, 3d
-    Multi-source Integration :a3, after a2, 7d
-    section Data Processing
-    Design Labeling Process :b1, 2025-03-04, 10d
-    Create Quality Metrics  :b2, after b1, 7d
-    Start Data Collection  :b3, after a3, 14d
-```
+### 2. Web Application
+- ✅ FastAPI backend with model serving
+- ✅ Next.js frontend with TypeScript
+- ✅ Real-time visualization components
+- ✅ Docker development environment
 
-### 2. Model Development Pipeline
-```mermaid
-gantt
-    title Model Development Timeline
-    dateFormat  YYYY-MM-DD
-    section LLM Integration
-    Setup LLaMA Environment    :c1, 2025-03-15, 10d
-    Implement Fine-tuning      :c2, after c1, 14d
-    Optimize Performance       :c3, after c2, 14d
-    section Trading Strategy
-    Design Strategy Framework  :d1, 2025-03-20, 14d
-    Implement Backtesting     :d2, after d1, 14d
-    Strategy Optimization     :d3, after d2, 21d
-```
+### 3. Sentiment Classes
+1. STRONGLY_POSITIVE
+2. POSITIVE
+3. NEUTRAL
+4. NEGATIVE
+5. STRONGLY_NEGATIVE
+6. NOT_RELATED
+7. UNCERTAIN
 
-## Current Challenges
+### 4. Model Training Features
+- LoRA configuration (r=8, alpha=16)
+- Multi-metric early stopping
+- Comprehensive evaluation metrics:
+  - Accuracy
+  - Precision
+  - Recall
+  - F1 Score
+  - Cohen's Kappa
+  - Matthews Correlation Coefficient
+  - ROC-AUC
 
-### 1. Data Collection
-- Optimize multi-source data collection
-- Configure crawlforai for financial data sources
-- Set up data validation and quality metrics
-- Monitor and adjust rate limit strategies
-- Work within the X API constraint of 3,200 tweets per user
-- Manage the free tier limit of 100 reads per month
-- Efficiently distribute quota across multiple accounts
-- Implement strategic collection scheduling to maximize value from limited quota
+### 5. Development Environment
+- Docker Compose setup
+- TypeScript + Tailwind CSS
+- FastAPI backend
+- Automated setup script
 
-### 2. Sentiment Analysis
-- Developing accurate labeling methodology
-- Ensuring consistent labeling across team
-- Handling market-specific terminology
-
-### 3. Model Development
-- LLaMA integration and optimization
-- Efficient fine-tuning process
-- Strategy validation methodology
+## Current Working Branches
+- main: Primary development branch
+- feature/model-training: Model training implementations
+- feature/web-interface: Web application development
 
 ## Next Steps
+1. Implement model versioning system
+2. Add model performance comparison visualization
+3. Implement real-time sentiment analysis API
+4. Add automated testing suite
 
-### Immediate Priorities
-1. Design and implement KOL identification system
-2. Develop sentiment labeling methodology
-3. Set up LLaMA fine-tuning infrastructure
-4. Create initial trading strategy framework
+## Technical Decisions
+1. Using LoRA for Gamma 3 to reduce training resources
+2. Multi-metric early stopping for better model quality
+3. Docker-based development for consistency
+4. TypeScript + Tailwind for modern frontend
 
-### Technical Tasks
-- [x] Basic Twitter scraping
-- [x] Data processing pipeline
-- [x] NER implementation
-- [ ] SeekingAlpha integration
-- [ ] Sentiment labeling interface
-- [ ] LLaMA model setup
-- [ ] Trading strategy backtesting
+## Dependencies
+```
+Python: 3.9+
+Node.js: 18+
+Frameworks:
+- FastAPI
+- Next.js
+- Transformers
+- PyTorch
+- Chart.js
+```
 
-## Key Decisions
-
-### Architecture
-- Using modular design for easy component updates
-- Implementing robust logging for debugging
-- Setting up scalable data storage
-
-### Methodology
-- Focus on high-influence KOLs for quality data
-- Rigorous sentiment labeling process
-- Multi-factor trading strategy approach
-
-### Tools & Technologies
-- crawlforai for multi-source data collection
-- LLaMA for sentiment analysis
-- Python-based trading framework
-
-## Risk Monitoring
-
-### Technical Risks
-- Crawler maintenance and updates
-- Data quality consistency
-- Model performance stability
-
-### Project Risks
-- Data collection timeline
-- Labeling accuracy
-- Strategy validation period
-
-## Upcoming Milestones
-1. Complete KOL identification system
-2. Establish labeling methodology
-3. Initial LLM fine-tuning
-4. Basic trading strategy implementation
+## API Endpoints
+- GET `/metrics` - Model performance metrics
+- GET `/confusion_matrices` - Confusion matrices
+- GET `/sample_predictions` - Sample predictions
+- GET `/performance_comparison` - Model comparison

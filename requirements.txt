@@ -1,40 +1,37 @@
-Bottleneck @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_2bxpizxa3c/croot/bottleneck_1707864819812/work
-certifi==2024.8.30
-charset-normalizer==3.4.0
-et_xmlfile==2.0.0
-filelock @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_d3quwmvouf/croot/filelock_1700591194006/work
-fsspec==2024.10.0
-gmpy2 @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/croot-muov7gw1/gmpy2_1645462616268/work
-huggingface-hub==0.26.2
-idna==3.10
-Jinja2 @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_44yzu12j7f/croot/jinja2_1716993410427/work
-joblib==1.4.2
-MarkupSafe @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_a84ni4pci8/croot/markupsafe_1704206002077/work
-mpmath @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_17iu6a8a3m/croot/mpmath_1690848269369/work
-networkx @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_b9af3smw_7/croot/networkx_1690562010704/work
-numexpr @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_76yyu1p9jk/croot/numexpr_1683221830860/work
-numpy @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_f9f5xs2fx0/croot/numpy_and_numpy_base_1682520577456/work
-openpyxl==3.1.5
-packaging==24.2
-pandas @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_b9nb2vqtpu/croot/pandas_1692289331806/work
-python-crfsuite==0.9.11
-python-dateutil @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_66ud1l42_h/croot/python-dateutil_1716495741162/work
-pytz @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_a4b76c83ik/croot/pytz_1713974318928/work
-PyYAML==6.0.2
-regex==2024.11.6
-requests==2.32.3
-safetensors==0.4.5
-scikit-learn==1.3.2
-scipy==1.10.1
-six @ file:///tmp/build/80754af9/six_1644875935023/work
-sklearn-crfsuite==0.5.0
-sympy @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_12ufyeicwp/croot/sympy_1724938200081/work
-tabulate==0.9.0
-threadpoolctl==3.5.0
-tokenizers==0.20.3
-torch @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_f2vdv9nc2o/croot/pytorch-select_1725908300995/work
-tqdm==4.67.1
-transformers==4.46.3
-typing_extensions @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_93dg13ilv4/croot/typing_extensions_1715268840722/work
-tzdata @ file:///croot/python-tzdata_1690578112552/work
-urllib3==2.2.3
+# Core ML libraries
+torch>=2.1.2
+transformers>=4.36.2
+datasets>=2.16.1
+peft>=0.7.1
+accelerate>=0.25.0
+bitsandbytes>=0.41.3
+
+# Data processing
+pandas>=2.1.4
+numpy>=1.26.3
+scikit-learn>=1.3.2
+
+# Jupyter environment
+jupyter>=1.0.0
+notebook>=7.0.6
+ipykernel>=6.29.0
+
+# API and web
+fastapi>=0.109.0
+uvicorn>=0.27.0
+python-multipart>=0.0.6
+pydantic>=2.5.3
+
+# Utilities
+tqdm>=4.66.1
+google-generativeai>=0.3.2
+python-dotenv>=1.0.0
+
+# Metrics and visualization
+seaborn>=0.13.1
+matplotlib>=3.8.2
+
+# Development tools
+black>=24.1.0
+isort>=5.13.2
+flake8>=7.0.0
