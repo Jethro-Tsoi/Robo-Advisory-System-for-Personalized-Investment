@@ -45,6 +45,17 @@
    - PEFT >= 0.7.1
    - Accelerate >= 0.25.0
    - Scikit-learn >= 1.3.2
+   - Polars >= 0.20.0 (for efficient data processing)
+   - huggingface_hub >= 0.20.0 (for dataset access)
+
+3. APIs and External Services
+   - OpenRouter API
+     - Access to Gemini 2.5 Pro model
+     - Used for 5-class sentiment labeling
+     - Efficient batched processing
+   - Hugging Face Datasets
+     - Access to stock_market_tweets dataset (~1.7M tweets)
+     - Efficient loading with Polars
 
 ### Backend
 1. Framework
@@ -113,12 +124,12 @@
 
 ### Data Flow
 ```
-Raw Tweets → Preprocessing → Model Inference → API → Frontend Display
+Stock Market Tweets → Preprocessing (Polars) → Sentiment Labeling (Gemini 2.5 Pro) → Model Training → API → Frontend Display
 ```
 
 ### Model Pipeline
 ```
-Data Labeling (Gemini) → Training → Evaluation → Deployment
+Data Labeling (OpenRouter's Gemini 2.5 Pro) → Training → Evaluation → Deployment
 ```
 
 ### API Architecture
@@ -127,6 +138,19 @@ Client Request → FastAPI Router → Model Service → Response
 ```
 
 ## Performance Considerations
+
+### Data Processing Optimization
+1. Polars for Data Processing
+   - Memory-efficient operations
+   - Parallel execution
+   - Lazy evaluation
+   - Arrow-based data format
+
+2. Threading for API Requests
+   - ThreadPoolExecutor for parallel sentiment analysis
+   - Batch processing to reduce API calls
+   - Rate limiting to prevent throttling
+   - Retry logic for resilience
 
 ### Model Optimization
 1. Gemma 3 Optimization
@@ -163,6 +187,13 @@ Client Request → FastAPI Router → Model Service → Response
    - Build optimization
 
 ## Security Measures
+
+### API Security
+1. OpenRouter API
+   - Environment-based API key management
+   - Proper HTTP headers
+   - Rate limiting implementation
+   - Error handling
 
 ### Container Security
 1. Resource Isolation

@@ -16,10 +16,13 @@
    - ✅ Modified Gemini labeling to consider stock context
 
 3. Data Labeling Enhancement
-   - ✅ Updated labeling process to focus on stock-specific sentiment
-   - ✅ Added context about mentioned stocks to Gemini prompts
-   - ✅ Created dedicated dataset of stock-related tweets
-   - ✅ Improved analysis by stock symbol
+   - ✅ Updated to 5-class sentiment labeling (removed NOT_RELATED and UNCERTAIN)
+   - ✅ Implemented OpenRouter's Gemini 2.5 Pro API for improved model access
+   - ✅ Switched to Hugging Face's stock_market_tweets dataset with ~1.7M tweets
+   - ✅ Implemented Polars for more efficient data processing
+   - ✅ Added parallel processing for faster sentiment analysis
+   - ✅ Improved error handling and retry logic
+   - ✅ Simplified workflow focusing on `00_data_labeling.ipynb` as the main notebook
 
 ### Model Implementation Expansion
 1. Gemma 3 Integration
@@ -61,12 +64,13 @@
    - ✅ Stock symbol extraction and verification
    - ✅ Stock-specific sentiment analysis
    - ✅ Multi-stage data preparation workflow
+   - ✅ Integration with Hugging Face datasets
 
-2. Data labeling system with Gemini API
-   - ✅ 7-class sentiment classification
-   - ✅ Stock symbol-focused labeling
-   - ✅ Automated processing
-   - ✅ Error handling and retries
+2. Data labeling system
+   - ✅ 5-class sentiment classification with OpenRouter's Gemini 2.5 Pro
+   - ✅ Efficient batch processing with parallelization
+   - ✅ Comprehensive error handling and retries
+   - ✅ Support for large-scale datasets
 
 3. Model Training Implementation
    - ✅ Gamma 3 with LoRA
@@ -102,11 +106,11 @@
 
 ## In Progress 🔄
 
-### Stock-Specific Model Training
-1. Training on filtered stock tweets
-2. Stock symbol embedding integration
-3. Performance optimization for stock prediction
-4. Comparison with general financial models
+### Training with New Labeled Data
+1. Training with 5-class sentiment labels
+2. Using data from stock_market_tweets dataset
+3. Performance optimization and evaluation
+4. Comparison with previous model versions
 
 ### Gemma 3 Implementation
 1. Training pipeline setup
@@ -135,7 +139,7 @@
 ## Planned Items 📋
 
 ### Short-term Tasks
-1. Train models on stock-specific tweets
+1. Train models on the new 5-class labeled stock market tweets
 2. Complete Gemma 3 model training and evaluation
 3. Implement automated testing
 4. Add model comparison features
@@ -179,11 +183,12 @@
 3. Basic functionality implemented
 4. Environment configuration simplified
 5. Documentation structure established
+6. Simplified notebook workflow (focusing on `00_data_labeling.ipynb`)
 
 ## Next Steps 👉
 
 ### Immediate Actions
-1. Train models on stock-specific tweets
+1. Train models on the new 5-class labeled stock market tweets
 2. Complete Gemma 3 model implementation and training
 3. Implement automated testing
 4. Add model versioning
@@ -206,6 +211,8 @@
 
 ### Phase 2: Enhancement (Current)
 - ✅ NER and stock symbol integration
+- ✅ Updated sentiment labeling with OpenRouter's Gemini 2.5 Pro
+- ✅ Integration with Hugging Face datasets
 - 🔄 Gemma 3 integration
 - 🔄 Testing
 - 🔄 Documentation
