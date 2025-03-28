@@ -1,0 +1,9 @@
+Model:
+https://huggingface.co/StephanAkkerman/FinTwitBERT/tree/main
+
+Dataset:
+https://huggingface.co/datasets/StephanAkkerman/financial-tweets-stocks
+
+https://huggingface.co/datasets/mjw/stock_market_tweets hv tick date author
+https://huggingface.co/datasets/koen430/preprocessed_stock_twitter
+https://huggingface.co/datasets/koen430/random_selected_stock_twitter
