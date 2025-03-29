@@ -1,6 +1,6 @@
 # Financial Sentiment Analysis Dashboard
 
-A modern web application for comparing and visualizing the performance of Gamma 3 and FinBERT models on financial sentiment analysis.
+A modern web application for comparing and visualizing the performance of Gamma 3, Gemma 3, and FinBERT models on financial sentiment analysis.
 
 ## Technology Stack
 
@@ -15,10 +15,12 @@ A modern web application for comparing and visualizing the performance of Gamma 
 ### Backend
 - FastAPI
 - Python 3.9
+- Polars
 - Pandas
 - NumPy
 - PyTorch
 - Transformers
+- PEFT (Parameter-Efficient Fine-Tuning)
 
 ## Development Setup
 
@@ -26,6 +28,7 @@ A modern web application for comparing and visualizing the performance of Gamma 
 - Docker and Docker Compose
 - Node.js 18+ (for local development without Docker)
 - Python 3.9+ (for local development without Docker)
+- Mistral AI API keys (for data labeling)
 
 ### Quick Start with Docker
 
@@ -84,14 +87,15 @@ web/
 - Interactive model performance comparison
 - Real-time sentiment analysis visualization
 - Side-by-side model predictions
+- 5-class sentiment classification (STRONGLY_POSITIVE, POSITIVE, NEUTRAL, NEGATIVE, STRONGLY_NEGATIVE)
 - Responsive design with dark mode support
 - REST API with automatic documentation
 
 ## API Endpoints
 
 - GET `/metrics` - Model performance metrics
-- GET `/confusion_matrices` - Confusion matrices for both models
-- GET `/sample_predictions` - Sample predictions from both models
+- GET `/confusion_matrices` - Confusion matrices for all models
+- GET `/sample_predictions` - Sample predictions from all models
 - GET `/performance_comparison` - Detailed performance comparison
 
 ## Development
@@ -116,6 +120,20 @@ npm test
 cd backend
 pytest
 ```
+
+## API Key Management
+
+For data labeling with Mistral AI, configure the API keys in the root `.env` file:
+
+```
+MISTRAL_API_KEY=your_primary_key
+MISTRAL_API_KEY_1=your_second_key
+```
+
+The system includes a KeyManager class that automatically:
+- Rotates between keys when rate limits are reached
+- Tracks when rate-limited keys become available again
+- Implements waiting strategies when all keys are limited
 
 ## Contributing
 

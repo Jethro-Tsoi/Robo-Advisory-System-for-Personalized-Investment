@@ -49,10 +49,12 @@
    - huggingface_hub >= 0.20.0 (for dataset access)
 
 3. APIs and External Services
-   - OpenRouter API
-     - Access to Gemini 2.5 Pro model
+   - Mistral AI API
+     - Uses the "mistral-small-latest" model
      - Used for 5-class sentiment labeling
-     - Efficient batched processing
+     - KeyManager for handling multiple API keys
+     - Automatic key rotation on rate limiting
+     - Efficient concurrent processing
    - Hugging Face Datasets
      - Access to stock_market_tweets dataset (~1.7M tweets)
      - Efficient loading with Polars
@@ -124,12 +126,12 @@
 
 ### Data Flow
 ```
-Stock Market Tweets → Preprocessing (Polars) → Sentiment Labeling (Gemini 2.5 Pro) → Model Training → API → Frontend Display
+Stock Market Tweets → Preprocessing (Polars) → Sentiment Labeling (Mistral AI) → Model Training → API → Frontend Display
 ```
 
 ### Model Pipeline
 ```
-Data Labeling (OpenRouter's Gemini 2.5 Pro) → Training → Evaluation → Deployment
+Data Labeling (Mistral AI) → Training → Evaluation → Deployment
 ```
 
 ### API Architecture
@@ -148,9 +150,20 @@ Client Request → FastAPI Router → Model Service → Response
 
 2. Threading for API Requests
    - ThreadPoolExecutor for parallel sentiment analysis
+   - KeyManager for API key rotation
    - Batch processing to reduce API calls
    - Rate limiting to prevent throttling
    - Retry logic for resilience
+   - Progress tracking and resuming capabilities
+
+3. Data Labeling Optimization
+   - Key Manager for multiple API keys:
+     - Auto-rotation on rate limits
+     - Tracking of rate-limited keys
+     - Waiting strategy for all-keys-limited scenarios
+   - Periodic state saving for resuming
+   - JSON-based progress tracking
+   - Batch-based processing
 
 ### Model Optimization
 1. Gemma 3 Optimization
@@ -189,11 +202,12 @@ Client Request → FastAPI Router → Model Service → Response
 ## Security Measures
 
 ### API Security
-1. OpenRouter API
-   - Environment-based API key management
+1. Mistral AI API
+   - Multiple API key management
+   - Environment-based API key storage
+   - Key rotation on rate limits
    - Proper HTTP headers
-   - Rate limiting implementation
-   - Error handling
+   - Backoff strategy
 
 ### Container Security
 1. Resource Isolation
@@ -225,6 +239,13 @@ Client Request → FastAPI Router → Model Service → Response
    - Volume usage
    - Network metrics
    - Application logs
+
+### Data Processing Monitoring
+1. Progress Tracking
+   - Periodic state saving
+   - Batch-level progress
+   - JSON-based checkpoints
+   - Resumable processing
 
 ## Testing Strategy
 

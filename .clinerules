@@ -36,7 +36,7 @@
 - LoRA configuration for Gamma 3 (r=8, alpha=16)
 - Multi-metric early stopping for better quality
 - Comprehensive evaluation with multiple metrics
-- 7-class sentiment classification
+- 5-class sentiment classification (STRONGLY_POSITIVE, POSITIVE, NEUTRAL, NEGATIVE, STRONGLY_NEGATIVE)
 
 ## Project Intelligence
 
@@ -48,14 +48,15 @@
 
 ### Development Setup
 - Environment setup requires Docker and Make
-- Google API key required for Gemini integration
+- Mistral AI API keys required for sentiment labeling (set as MISTRAL_API_KEY, MISTRAL_API_KEY_1, etc.)
 - Container-based workflow with hot reloading
 - Testing via make test-backend and make test-frontend
 
 ### Known Patterns
-- 7-class sentiment classification system
-- Two model approach (Gamma 3 and FinBERT) for comparison
-- Data labeling with Gemini API
+- 5-class sentiment classification system (removed NOT_RELATED and UNCERTAIN classes)
+- Two model approach (Gamma 3 and FinBERT) for comparison, with Gemma 3 in progress
+- Data labeling with Mistral AI API using KeyManager for multiple API keys
+- Resume-capable data labeling with progress tracking
 - Visualization-heavy frontend
 
 ### User Preferences
@@ -65,6 +66,10 @@
 - Performance-focused model training
 
 ### Recent Evolution
+- Switched from OpenRouter's Gemini 2.5 Pro to Mistral AI API for sentiment labeling
+- Implemented resume-capable data labeling with `00_data_labeling_with_resume.ipynb`
+- Deprecated `01_data_preparation.ipynb` in favor of the resume-capable approach
+- Added KeyManager class for handling multiple API keys
 - Moved from script-based setup to Makefile
 - Enhanced Docker configuration
 - Added development tools container
@@ -75,6 +80,7 @@
 - Ensuring consistent development environment
 - Maintaining performance in containerized setup
 - Handling model versioning effectively
+- Managing API rate limits with multiple keys
 
 ## Model Selection Principles
 1. Prefer models with demonstrated performance in financial text analysis
@@ -100,7 +106,7 @@
 ## Naming Conventions
 1. Notebooks: `{number}_{purpose}.ipynb` (e.g., `02a_gamma3_training_lora.ipynb`)
 2. Models: `{model_name}_lora_adapter` for LoRA models, `{model_name}_full` for full fine-tuning
-3. Data files: `all_labeled_tweets.csv` for the main dataset
+3. Data files: `labeled_stock_tweets.csv` for the main dataset
 4. Metrics files: `metrics.csv` and `training_history.csv`
 
 ## Implementation Details
@@ -116,7 +122,13 @@
    - FinBERT: batch_size=32, learning_rate=3e-5
    - All models: early_stopping(patience=3)
 
-3. Model Serving
+3. API Key Management
+   - Use KeyManager class for handling multiple Mistral API keys
+   - Set keys as environment variables: MISTRAL_API_KEY, MISTRAL_API_KEY_1, etc.
+   - Keys rotate automatically when rate limits are hit
+   - Implement waiting strategy when all keys are limited
+
+4. Model Serving
    - Load adapters instead of full models
    - Use device_map="auto" for automatic device placement
    - Implement caching for repeated predictions
@@ -147,4 +159,11 @@
 2. Document model architecture and training details
 3. Provide usage examples in README
 4. Keep memory-bank up-to-date with all decisions
-5. Document performance metrics for all models 
+5. Document performance metrics for all models
+
+## Data Labeling Workflow
+1. Use `00_data_labeling_with_resume.ipynb` as the primary data labeling notebook
+2. Configure Mistral AI API keys in environment variables
+3. Use resume capability for long-running labeling tasks
+4. Save progress regularly (every 100 samples processed)
+5. Monitor rate limiting and key rotation behavior 

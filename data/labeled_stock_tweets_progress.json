@@ -1,1 +1,1 @@
-{"current_batch": 3564, "processed_count": 14256, "total_batches": 7043, "timestamp": "2025-03-29 10:44:27", "last_processed_tweets": [{"idx": 13919, "sentiment": "NEUTRAL"}, {"idx": 13918, "sentiment": "NEUTRAL"}, {"idx": 13917, "sentiment": "NEUTRAL"}]}
+{"current_batch": 3918, "processed_count": 15672, "total_batches": 7043, "timestamp": "2025-03-29 10:55:37", "last_processed_tweets": [{"idx": 12503, "sentiment": "STRONGLY_POSITIVE"}, {"idx": 12502, "sentiment": "NEUTRAL"}, {"idx": 12501, "sentiment": "NEGATIVE"}]}

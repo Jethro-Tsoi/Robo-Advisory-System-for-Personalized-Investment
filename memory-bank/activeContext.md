@@ -8,7 +8,8 @@ Financial sentiment analysis system using Google's Gemma 3, Gamma 3 and FinBERT 
 ### 1. Machine Learning Pipeline
 - ✅ NER processing with bert-base-ner to identify entity types
 - ✅ Stock symbol detection and verification using yfinance
-- ✅ Data labeling with OpenRouter's Gemini 2.5 Pro API (5-class classification) with Hugging Face's stock_market_tweets dataset
+- ✅ Data labeling with Mistral AI API (5-class classification) with Hugging Face's stock_market_tweets dataset
+- ✅ Resume-capable data labeling with 00_data_labeling_with_resume.ipynb
 - ✅ Gamma 3 model with LoRA fine-tuning and early stopping
 - ✅ FinBERT model implementation
 - ✅ Multi-metric evaluation system
@@ -50,6 +51,7 @@ Financial sentiment analysis system using Google's Gemma 3, Gamma 3 and FinBERT 
 - Stock symbol extraction and verification
 - Focus on stock-specific sentiment analysis
 - Direct access to Hugging Face's stock_market_tweets dataset with Polars
+- Resume-capable data labeling with Mistral AI API 
 
 ### 7. Development Workflow
 - Docker-centric development using `make` commands
@@ -63,12 +65,13 @@ Financial sentiment analysis system using Google's Gemma 3, Gamma 3 and FinBERT 
 - feature/web-interface: Web application development
 
 ## Recent Updates
-- Updated sentiment labeling to use 5 classes instead of 7 (removed NOT_RELATED and UNCERTAIN)
-- Integrated OpenRouter for access to Gemini 2.5 Pro API
-- Switched to using Hugging Face's stock_market_tweets dataset
-- Implemented Polars for efficient dataframe operations
+- Replaced OpenRouter Gemini 2.5 Pro API with Mistral AI API for sentiment labeling
+- Implemented resume-capable data labeling with the new notebook 00_data_labeling_with_resume.ipynb
+- Deprecated 01_data_preparation.ipynb in favor of 00_data_labeling_with_resume.ipynb
+- Added KeyManager class for handling multiple Mistral API keys with rotation
 - Added parallel processing with ThreadPoolExecutor for better performance
-- Restructured data labeling workflow to be more efficient and reliable
+- Restructured data labeling workflow to support resuming from previous runs
+- Added 5-class sentiment labeling using Mistral AI API
 - Added stock symbol detection and verification step
 - Added Named Entity Recognition (NER) preprocessing
 - Modified data labeling to focus on stock-specific tweets
@@ -79,24 +82,26 @@ Financial sentiment analysis system using Google's Gemma 3, Gamma 3 and FinBERT 
 - Improved build system and cleanup procedures
 
 ## Next Steps
-1. Train models using the new 5-class labeled data from stock_market_tweets dataset
-2. Complete Gemma 3 model implementation and training
-3. Implement model versioning system
-4. Add model performance comparison visualization
-5. Implement real-time sentiment analysis API
-6. Add automated testing suite
+1. Complete data labeling of the stock_market_tweets dataset using the resume-capable approach
+2. Train models using the newly labeled data
+3. Complete Gemma 3 model implementation and training
+4. Implement model versioning system
+5. Add model performance comparison visualization
+6. Implement real-time sentiment analysis API
+7. Add automated testing suite
 
 ## Technical Decisions
 1. Using 5-class sentiment labeling for more focused sentiment analysis
-2. Using OpenRouter for access to Gemini 2.5 Pro for better sentiment classification
+2. Using Mistral AI API instead of OpenRouter for better reliability in sentiment classification
 3. Using Polars instead of Pandas for more efficient dataframe operations
 4. Using BERT-based NER to identify entities in financial tweets
 5. Focusing ML training on tweets with verified stock symbols
 6. Using LoRA for Gamma 3 and Gemma 3 to reduce training resources
-7. Multi-metric early stopping for better model quality
-8. Docker-based development for consistency
-9. TypeScript + Tailwind for modern frontend
-10. Makefile for standardized commands
+7. Implementing resume-capable data labeling to handle large datasets reliably
+8. Multi-metric early stopping for better model quality
+9. Docker-based development for consistency
+10. TypeScript + Tailwind for modern frontend
+11. Makefile for standardized commands
 
 ## Dependencies
 ```
@@ -113,7 +118,7 @@ Frameworks:
 Additional:
 - BERT-based NER
 - yfinance
-- OpenRouter API
+- Mistral AI API
 - huggingface_hub
 ```
 
@@ -124,7 +129,7 @@ Additional:
 - GET `/performance_comparison` - Model comparison
 
 ## Key Project Files
-- `notebooks/00_data_labeling.ipynb` - Data labeling using OpenRouter's Gemini 2.5 Pro and stock_market_tweets dataset
+- `notebooks/00_data_labeling_with_resume.ipynb` - Enhanced data labeling using Mistral AI API with resume capability
 - `notebooks/00b_ner_stock_identification.ipynb` - NER and stock symbol detection
 - `notebooks/02a_gamma3_training_lora.ipynb` - Gamma 3 model training
 - `notebooks/02b_gemma3_training_lora.ipynb` - Gemma 3 model training

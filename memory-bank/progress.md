@@ -3,26 +3,26 @@
 ## Latest Updates ✅
 
 ### Data Processing Enhancement
-1. Named Entity Recognition (NER) Integration
+1. Data Labeling Improvements
+   - ✅ Switched from OpenRouter's Gemini 2.5 Pro to Mistral AI API for sentiment labeling
+   - ✅ Created resume-capable data labeling with `00_data_labeling_with_resume.ipynb`
+   - ✅ Deprecated `01_data_preparation.ipynb` in favor of `00_data_labeling_with_resume.ipynb`
+   - ✅ Implemented KeyManager class for handling multiple Mistral API keys with rotation
+   - ✅ Added progress tracking and state saving for long-running labeling processes
+   - ✅ Enhanced error handling with better retry logic
+   - ✅ Improved batch processing with ThreadPoolExecutor
+
+2. Named Entity Recognition (NER) Integration
    - ✅ Created notebook for BERT-based NER preprocessing
    - ✅ Implemented entity extraction from financial tweets
    - ✅ Added identification of various entity types in tweets
    - ✅ Set up entity type and value tracking
 
-2. Stock Symbol Focus
+3. Stock Symbol Focus
    - ✅ Added stock symbol extraction using regex patterns
    - ✅ Implemented verification against real stocks using yfinance
    - ✅ Created filtering to focus on stock-specific tweets
-   - ✅ Modified Gemini labeling to consider stock context
-
-3. Data Labeling Enhancement
-   - ✅ Updated to 5-class sentiment labeling (removed NOT_RELATED and UNCERTAIN)
-   - ✅ Implemented OpenRouter's Gemini 2.5 Pro API for improved model access
-   - ✅ Switched to Hugging Face's stock_market_tweets dataset with ~1.7M tweets
-   - ✅ Implemented Polars for more efficient data processing
-   - ✅ Added parallel processing for faster sentiment analysis
-   - ✅ Improved error handling and retry logic
-   - ✅ Simplified workflow focusing on `00_data_labeling.ipynb` as the main notebook
+   - ✅ Modified labeling to consider stock context
 
 ### Model Implementation Expansion
 1. Gemma 3 Integration
@@ -67,10 +67,11 @@
    - ✅ Integration with Hugging Face datasets
 
 2. Data labeling system
-   - ✅ 5-class sentiment classification with OpenRouter's Gemini 2.5 Pro
+   - ✅ 5-class sentiment classification using Mistral AI API
    - ✅ Efficient batch processing with parallelization
    - ✅ Comprehensive error handling and retries
    - ✅ Support for large-scale datasets
+   - ✅ Resume-capable processing for long-running tasks
 
 3. Model Training Implementation
    - ✅ Gamma 3 with LoRA
@@ -107,10 +108,11 @@
 ## In Progress 🔄
 
 ### Training with New Labeled Data
-1. Training with 5-class sentiment labels
-2. Using data from stock_market_tweets dataset
-3. Performance optimization and evaluation
-4. Comparison with previous model versions
+1. Completing data labeling using resume-capable approach
+2. Training with 5-class sentiment labels
+3. Using data from stock_market_tweets dataset
+4. Performance optimization and evaluation
+5. Comparison with previous model versions
 
 ### Gemma 3 Implementation
 1. Training pipeline setup
@@ -139,12 +141,13 @@
 ## Planned Items 📋
 
 ### Short-term Tasks
-1. Train models on the new 5-class labeled stock market tweets
-2. Complete Gemma 3 model training and evaluation
-3. Implement automated testing
-4. Add model comparison features
-5. Enhance error handling
-6. Optimize performance
+1. Complete data labeling with resume-capable notebook
+2. Train models on the newly labeled data
+3. Complete Gemma 3 model training and evaluation
+4. Implement automated testing
+5. Add model comparison features
+6. Enhance error handling
+7. Optimize performance
 
 ### Medium-term Goals
 1. Add more models
@@ -183,17 +186,18 @@
 3. Basic functionality implemented
 4. Environment configuration simplified
 5. Documentation structure established
-6. Simplified notebook workflow (focusing on `00_data_labeling.ipynb`)
+6. Simplified notebook workflow with resume capability
 
 ## Next Steps 👉
 
 ### Immediate Actions
-1. Train models on the new 5-class labeled stock market tweets
-2. Complete Gemma 3 model implementation and training
-3. Implement automated testing
-4. Add model versioning
-5. Enhance visualization
-6. Implement security measures
+1. Complete data labeling with the resume-capable approach
+2. Train models on the newly labeled data
+3. Complete Gemma 3 model implementation and training
+4. Implement automated testing
+5. Add model versioning
+6. Enhance visualization
+7. Implement security measures
 
 ### Future Considerations
 1. Scale infrastructure
@@ -211,8 +215,9 @@
 
 ### Phase 2: Enhancement (Current)
 - ✅ NER and stock symbol integration
-- ✅ Updated sentiment labeling with OpenRouter's Gemini 2.5 Pro
+- ✅ Updated sentiment labeling with Mistral AI API
 - ✅ Integration with Hugging Face datasets
+- ✅ Resume-capable data labeling
 - 🔄 Gemma 3 integration
 - 🔄 Testing
 - 🔄 Documentation
