@@ -752,7 +752,7 @@ SAVE_EVERY = 100  # Save results every N tweets processed
 RATE_LIMIT_WAIT = 0  # Default wait time in seconds when rate limited
 
 # Change this to the batch you want to resume from
-resume_batch = int(6000 / BATCH_SIZE)
+resume_batch = int(13600 / BATCH_SIZE)
 
 # Process tweets using concurrent API keys with resuming capability
 sentiments = process_tweets_concurrent_resumed(
