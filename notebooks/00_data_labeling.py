@@ -1,20 +1,15 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# Install required packages
-import subprocess
-import sys
+# In[29]:
 
-# Install required packages if not already installed
-try:
-    import polars
-    import requests
-    import tqdm
-except ImportError:
-    print("Installing required packages...")
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "polars", "requests", "tqdm"])
 
-# Import necessary libraries
+# get_ipython().system('pip install polars requests tqdm')
+
+
+# In[16]:
+
+
 import os
 import polars as pl
 import requests
@@ -26,7 +21,7 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 
 
-# In[16]:
+# In[17]:
 
 
 class KeyManager:
@@ -313,7 +308,7 @@ try:
     import huggingface_hub
 except ImportError:
     print("Installing huggingface_hub...")
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "huggingface_hub"])
+    # get_ipython().system('pip install huggingface_hub')
     import huggingface_hub
 
 # Load the dataset using Polars
@@ -709,4 +704,286 @@ for sentiment in ['STRONGLY_POSITIVE', 'POSITIVE', 'NEUTRAL', 'NEGATIVE', 'STRON
     examples = sample_df.filter(pl.col("sentiment") == sentiment).sample(1, seed=42)
     if examples.shape[0] > 0:
         print(f"\n{sentiment}:\n{examples[0, tweet_column]}")
+
+
+# In[ ]:
+
+def process_tweets_concurrent_resumed(tweets, start_batch=0, batch_size=4, max_workers=2, save_every=100, rate_limit_wait=5):
+    """Process tweets in batches with Mistral AI API using concurrent API keys, resuming from a specific batch
+    
+    Parameters:
+    -----------
+    tweets : list
+        List of tweets to process
+    start_batch : int
+        Batch index to start processing from (for resuming interrupted processing)
+    batch_size : int
+        Number of tweets to process in each batch
+    max_workers : int
+        Number of concurrent workers
+    save_every : int
+        Save results after processing this many tweets
+    rate_limit_wait : int
+        Default wait time in seconds when rate limited (default: 5)
+        
+    Returns:
+    --------
+    list : Sentiment labels for each tweet
+    """
+    # Load partial results if available
+    save_path = "../data/labeled_stock_tweets_partial.csv"
+    try:
+        partial_df = pl.read_csv(save_path)
+        # Extract existing sentiments from the partial results
+        all_sentiments = partial_df['sentiment'].to_list()
+        print(f"Loaded {len(all_sentiments)} existing sentiment labels")
+    except:
+        # If no partial results exist, pre-allocate the array with None values
+        all_sentiments = [None] * len(tweets)
+        print("No existing results found, starting fresh")
+    
+    # Sort tweet indices in descending order (process larger row numbers first)
+    tweet_indices = list(range(len(tweets)))
+    tweet_indices.sort(reverse=True)
+    
+    # Create a KeyManager for each worker
+    key_managers = []
+    
+    # Check how many API keys we have available
+    available_keys = key_manager.api_keys.copy()
+    num_keys = len(available_keys)
+    
+    print(f"Using {num_keys} API keys concurrently for processing {len(tweets)} tweets")
+    print(f"Resuming from batch {start_batch}")
+    
+    if num_keys == 0:
+        raise ValueError("No API keys available")
+    
+    # Create a manager for each key
+    for i, key in enumerate(available_keys):
+        # Create a separate manager for each key
+        km = KeyManager()
+        # Replace the API keys with just one key
+        km.api_keys = [key]
+        km.current_index = 0
+        key_managers.append(km)
+    
+    # Function to process a tweet with a specific key manager
+    def process_tweet_with_key(args):
+        idx, tweet, key_idx = args
+        # Skip already processed tweets (with non-None sentiments)
+        if idx < len(all_sentiments) and all_sentiments[idx] is not None:
+            return (idx, all_sentiments[idx])
+        
+        # Get the key manager for this worker
+        km = key_managers[key_idx % num_keys]
+        
+        # Define a local get_sentiment function that uses this specific key manager
+        def local_get_sentiment(text, retries=3):
+            if not text or len(str(text).strip()) < 3:
+                return 'NEUTRAL'
+            
+            for attempt in range(retries):
+                try:
+                    # Setup the API request for Mistral
+                    headers = km.get_current_headers()
+                    payload = {
+                        "model": MODEL,
+                        "temperature": 0.0,  # Deterministic output
+                        "max_tokens": 10,    # We only need one word
+                        "messages": setup_prompt(text)
+                    }
+                    
+                    # Make the API request
+                    response = requests.post(
+                        km.base_url,
+                        headers=headers,
+                        json=payload
+                    )
+                    
+                    if response.status_code == 200:
+                        # Extract sentiment from Mistral's response
+                        response_json = response.json()
+                        sentiment = response_json['choices'][0]['message']['content'].strip().upper()
+                        
+                        # Validate the response
+                        valid_labels = [
+                            'STRONGLY_POSITIVE', 'POSITIVE', 'NEUTRAL', 'NEGATIVE', 'STRONGLY_NEGATIVE'
+                        ]
+                        
+                        if sentiment in valid_labels:
+                            return sentiment
+                        else:
+                            print(f"Invalid sentiment received: {sentiment}, defaulting to NEUTRAL")
+                            return 'NEUTRAL'
+                    elif response.status_code == 429:  # Rate limit
+                        # If rate limited, just wait instead of switching keys
+                        # Always use rate_limit_wait as fallback
+                        retry_after = int(response.headers.get('Retry-After', rate_limit_wait))
+                        print(f"API key {key_idx+1} rate limited. Waiting {retry_after} seconds.")
+                        time.sleep(retry_after)
+                        if attempt < retries - 1:
+                            continue
+                        else:
+                            return 'NEUTRAL'
+                    else:
+                        print(f"API error: {response.status_code} - {response.text}")
+                        if attempt < retries - 1:
+                            time.sleep(2)  # Wait before retry
+                            continue
+                        else:
+                            return 'NEUTRAL'
+                        
+                except Exception as e:
+                    error_str = str(e).lower()
+                    # Check for rate limiting errors
+                    if "quota" in error_str or "rate" in error_str or "429" in error_str:
+                        # Extract retry time if available (default to rate_limit_wait if not found)
+                        retry_after = rate_limit_wait
+                        if "retryafter" in error_str or "retry-after" in error_str or "retry_after" in error_str:
+                            try:
+                                # Try to extract the retry time
+                                matches = re.findall(r'retry.*?(\d+)', error_str)
+                                if matches:
+                                    retry_after = int(matches[0])
+                            except:
+                                pass
+                        
+                        # Just wait instead of switching keys
+                        wait_time = min(2 ** attempt * 2, retry_after)  # Use smaller exponential backoff
+                        print(f"Rate limit hit for key {key_idx+1} - waiting {wait_time}s before retry ({attempt+1}/{retries})")
+                        time.sleep(wait_time)
+                        if attempt < retries - 1:
+                            continue
+                            
+                    if attempt == retries - 1:
+                        print(f"Error processing text: {str(text)[:50]}...\nError: {str(e)}")
+                        return 'NEUTRAL'
+                    time.sleep(2)  # Wait before retry
+            
+            return 'NEUTRAL'
+        
+        # Process the tweet
+        try:
+            result = local_get_sentiment(tweet)
+            return (idx, result)
+        except Exception as e:
+            print(f"Error processing tweet {idx}: {e}")
+            return (idx, 'NEUTRAL')
+    
+    # Create batches for processing
+    batches = []
+    for i in range(0, len(tweet_indices), batch_size):
+        batch_indices = tweet_indices[i:i+batch_size]
+        # More balanced key assignment - round robin style
+        batch = [(idx, tweets[idx], (i + idx) % num_keys) for idx in batch_indices]
+        batches.append(batch)
+    
+    # Process batches and periodically save results
+    # Calculate the processed count based on non-None values in all_sentiments
+    processed_count = sum(1 for s in all_sentiments if s is not None)
+    print(f"Found {processed_count} previously processed tweets")
+    
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    
+    # Skip to the starting batch
+    batches = batches[start_batch:]
+    print(f"Skipping {start_batch} batches, {start_batch * batch_size} tweets")
+    
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        for batch_idx, batch in enumerate(tqdm(batches, desc=f"Processing tweet batches (starting from batch {start_batch})")):
+            try:
+                # Process batch
+                results = list(executor.map(process_tweet_with_key, batch))
+                
+                # Update results
+                for idx, sentiment in results:
+                    # Only update if it wasn't already set (avoiding repeat API calls)
+                    if idx < len(all_sentiments) and all_sentiments[idx] is None:
+                        all_sentiments[idx] = sentiment
+                        processed_count += 1
+                
+                # Periodically save results
+                if (processed_count % save_every < batch_size) or (batch_idx % 50 == 0 and batch_idx > 0):
+                    # Create a temporary dataframe with current results
+                    temp_df = df.clone()
+                    # Only include processed tweets (non-None sentiments)
+                    valid_sentiments = [s if s is not None else 'NEUTRAL' for s in all_sentiments]
+                    temp_df = temp_df.with_columns(pl.Series(name='sentiment', values=valid_sentiments))
+                    # Save to CSV
+                    temp_df.write_csv(save_path)
+                    print(f"\nSaved {processed_count} processed tweets to {save_path}")
+                    
+                    # Save progress information to a JSON file
+                    import json
+                    progress = {
+                        "current_batch": start_batch + batch_idx + 1,
+                        "processed_count": processed_count,
+                        "total_batches": len(batches) + start_batch,
+                        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+                    }
+                    with open("../data/labeled_stock_tweets_progress.json", "w") as f:
+                        json.dump(progress, f)
+                
+                # Add a short delay between batches to avoid API overload
+                time.sleep(0.5)
+                
+            except Exception as e:
+                print(f"Error processing batch: {e}")
+                # Continue with the next batch
+                time.sleep(5)  # Wait a bit longer after an error
+    
+    # Replace any None values with NEUTRAL
+    all_sentiments = [s if s is not None else 'NEUTRAL' for s in all_sentiments]
+    
+    return all_sentiments
+
+
+# In[ ]:
+
+
+# Example of resuming from a specific batch
+# First load the progress information if available
+import json
+import os
+
+progress_file = "../data/labeled_stock_tweets_progress.json"
+resume_batch = 0  # Default starting batch
+
+if os.path.exists(progress_file):
+    try:
+        with open(progress_file, "r") as f:
+            progress = json.load(f)
+            resume_batch = progress.get("current_batch", 0)
+            print(f"Found saved progress, resuming from batch {resume_batch}")
+            print(f"Previously processed {progress.get('processed_count', 0)} tweets")
+    except:
+        print("Could not read progress file, starting from the beginning")
+else:
+    print("No progress file found, starting from the beginning")
+
+# Process tweets using the resumed concurrent approach
+tweets = sample_df[tweet_column].to_list()
+
+# Define parameters
+BATCH_SIZE = 4  # Number of tweets to process in each batch
+MAX_WORKERS = 2  # Number of concurrent workers (match to number of API keys)
+SAVE_EVERY = 100  # Save results every N tweets processed
+RATE_LIMIT_WAIT = 0  # Default wait time in seconds when rate limited
+
+# Process tweets using concurrent API keys with resuming capability
+sentiments = process_tweets_concurrent_resumed(
+    tweets, 
+    start_batch=resume_batch,
+    batch_size=BATCH_SIZE, 
+    max_workers=MAX_WORKERS,
+    save_every=SAVE_EVERY,
+    rate_limit_wait=RATE_LIMIT_WAIT
+)
+
+# Add sentiments to the DataFrame
+sample_df = sample_df.with_columns(pl.Series(name='sentiment', values=sentiments))
+
+# Display the results
+sample_df.select([tweet_column, 'sentiment']).head(10)
 
